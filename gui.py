@@ -40,15 +40,21 @@ class MplCanvas(FigureCanvas):
     def __init__(self, parent=None):
         fig = Figure()
         self.ax = fig.add_subplot(111)
-        self.ax.set_facecolor("#121212")   # Match Qt background
-        self.figure.patch.set_facecolor("#121212")
-        self.ax.grid(color="#444444")      # Softer grid
+
+        # --- Dark mode styling ---
+        self.ax.set_facecolor("#121212")
+        fig.patch.set_facecolor("#121212")
+
+        self.ax.grid(color="#444444")  # subtle grid
         self.ax.tick_params(colors="#e0e0e0")
         self.ax.xaxis.label.set_color("#e0e0e0")
         self.ax.yaxis.label.set_color("#e0e0e0")
+        self.ax.title.set_color("#e0e0e0")
+
         self.ax.set_title("Coordinate Plot")
         self.ax.set_xlabel("X")
         self.ax.set_ylabel("Y")
+
         super().__init__(fig)
 
 
@@ -79,7 +85,7 @@ class MainWindow(QMainWindow):
         main_splitter = QSplitter(Qt.Horizontal)
         main_splitter.addWidget(left_splitter)
         main_splitter.addWidget(self.text_log)
-        main_splitter.setSizes([1, 1])
+        main_splitter.setSizes([1, 1])  # split evenly
 
         central = QWidget()
         layout = QVBoxLayout(central)
@@ -104,12 +110,11 @@ class MainWindow(QMainWindow):
         self.text_log.append(html)
 
         # Example: parse node status messages
-        # Expect lines like: "NODE1: OK", "NODE2: ERROR", etc.
         if ":" in line:
             parts = line.split(":", 1)
             node = parts[0].strip()
             status = parts[1].strip()
-            if node.upper().startswith("NODE"):  # crude filter
+            if node.upper().startswith("NODE"):
                 self.node_states[node] = status
                 self.update_node_status()
 
@@ -127,6 +132,16 @@ class MainWindow(QMainWindow):
 
     def update_plot(self):
         self.canvas.ax.clear()
+
+        # --- Reapply dark styling after clear ---
+        self.canvas.ax.set_facecolor("#121212")
+        self.canvas.figure.patch.set_facecolor("#121212")
+        self.canvas.ax.grid(color="#444444")
+        self.canvas.ax.tick_params(colors="#e0e0e0")
+        self.canvas.ax.xaxis.label.set_color("#e0e0e0")
+        self.canvas.ax.yaxis.label.set_color("#e0e0e0")
+        self.canvas.ax.title.set_color("#e0e0e0")
+
         self.canvas.ax.plot(self.x_data, self.y_data, marker="o", linestyle="-")
         self.canvas.ax.set_title("Coordinate Plot")
         self.canvas.ax.set_xlabel("X")
@@ -134,7 +149,6 @@ class MainWindow(QMainWindow):
         self.canvas.draw()
 
     def update_node_status(self):
-        # Show latest snapshot of node states
         self.node_status.clear()
         for node, status in sorted(self.node_states.items()):
             self.node_status.append(f"{node}: {status}")
@@ -161,9 +175,6 @@ if __name__ == "__main__":
     """
     app.setStyleSheet(dark_stylesheet)
 
-    # --- Use matplotlib dark style ---
-    plt.style.use("dark_background")
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
-

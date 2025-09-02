@@ -2,7 +2,8 @@ import sys
 import serial
 import threading
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter, QTextEdit
+    QApplication, QMainWindow, QWidget, QVBoxLayout,
+    QSplitter, QTextEdit
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -50,25 +51,39 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Serial Plotter & Logger")
 
-        # Widgets
+        # Main plot
         self.canvas = MplCanvas(self)
+
+        # Logs (right side, colored)
         self.text_log = QTextEdit()
         self.text_log.setReadOnly(True)
         self.text_log.setAcceptRichText(True)
 
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(self.canvas)
-        splitter.addWidget(self.text_log)
-        splitter.setSizes([600, 200])
+        # Node Status (bottom of plot)
+        self.node_status = QTextEdit()
+        self.node_status.setReadOnly(True)
+
+        # Splitter for plot + node status
+        left_splitter = QSplitter(Qt.Vertical)
+        left_splitter.addWidget(self.canvas)
+        left_splitter.addWidget(self.node_status)
+        left_splitter.setSizes([400, 120])
+
+        # Main splitter: (plot+status) | (log)
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.addWidget(left_splitter)
+        main_splitter.addWidget(self.text_log)
+        main_splitter.setSizes([1, 1])
 
         central = QWidget()
         layout = QVBoxLayout(central)
-        layout.addWidget(splitter)
+        layout.addWidget(main_splitter)
         self.setCentralWidget(central)
 
-        # Data storage for plotting
+        # Data storage
         self.x_data = []
         self.y_data = []
+        self.node_states = {}  # dict of node_id -> status string
 
         # ANSI converter
         self.ansi_conv = Ansi2HTMLConverter(inline=True)
@@ -78,9 +93,19 @@ class MainWindow(QMainWindow):
         self.serial_reader.data_received.connect(self.handle_serial_data)
 
     def handle_serial_data(self, line):
-        # Convert ANSI escape codes -> HTML
+        # Convert ANSI escape codes -> HTML for log window
         html = self.ansi_conv.convert(line, full=False)
         self.text_log.append(html)
+
+        # Example: parse node status messages
+        # Expect lines like: "NODE1: OK", "NODE2: ERROR", etc.
+        if ":" in line:
+            parts = line.split(":", 1)
+            node = parts[0].strip()
+            status = parts[1].strip()
+            if node.upper().startswith("NODE"):  # crude filter
+                self.node_states[node] = status
+                self.update_node_status()
 
         # Try to parse coordinates in the form "x,y"
         try:
@@ -101,6 +126,12 @@ class MainWindow(QMainWindow):
         self.canvas.ax.set_xlabel("X")
         self.canvas.ax.set_ylabel("Y")
         self.canvas.draw()
+
+    def update_node_status(self):
+        # Show latest snapshot of node states
+        self.node_status.clear()
+        for node, status in sorted(self.node_states.items()):
+            self.node_status.append(f"{node}: {status}")
 
     def closeEvent(self, event):
         self.serial_reader.stop()

@@ -40,7 +40,13 @@ class MplCanvas(FigureCanvas):
     def __init__(self, parent=None):
         fig = Figure()
         self.ax = fig.add_subplot(111)
-        self.ax.set_title("Coordinate Plot")
+        self.ax.set_facecolor("#121212")   # Match Qt background
+        self.figure.patch.set_facecolor("#121212")
+        self.ax.grid(color="#444444")      # Softer grid
+        self.ax.tick_params(colors="#e0e0e0")
+        self.ax.xaxis.label.set_color("#e0e0e0")
+        self.ax.yaxis.label.set_color("#e0e0e0")
+            self.ax.set_title("Coordinate Plot")
         self.ax.set_xlabel("X")
         self.ax.set_ylabel("Y")
         super().__init__(fig)
@@ -140,6 +146,23 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    # --- Apply dark theme stylesheet ---
+    dark_stylesheet = """
+        QWidget {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        QTextEdit, QLabel {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #333333;
+        }
+    """
+    app.setStyleSheet(dark_stylesheet)
+
+    # --- Use matplotlib dark style ---
+    plt.style.use("dark_background")
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

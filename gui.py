@@ -46,7 +46,7 @@ class MplCanvas(FigureCanvas):
         self.ax.tick_params(colors="#e0e0e0")
         self.ax.xaxis.label.set_color("#e0e0e0")
         self.ax.yaxis.label.set_color("#e0e0e0")
-            self.ax.set_title("Coordinate Plot")
+        self.ax.set_title("Coordinate Plot")
         self.ax.set_xlabel("X")
         self.ax.set_ylabel("Y")
         super().__init__(fig)

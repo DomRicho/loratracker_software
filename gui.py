@@ -28,6 +28,8 @@ class SerialReader(QObject):
             while self.running:
                 line = ser.readline().decode(errors="ignore").strip()
                 if line:
+                    if line[0] == '$':
+                        continue
                     self.data_received.emit(line)
         except serial.SerialException as e:
             self.data_received.emit(f"Serial error: {e}")

@@ -11,6 +11,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from ansi2html import Ansi2HTMLConverter
 
+WINDOW_SIZE = 3
 
 class SerialReader(QObject):
     data_received = pyqtSignal(str)
@@ -137,14 +138,15 @@ class MainWindow(QMainWindow):
             print("Checksum error")
             return
         if cmd_list[0][3:] == "WTHR":
-            if (len(self.temp_samples) == 5): 
+            if (len(self.temp_samples) == WINDOW_SIZE): 
                 self.temp_samples.pop(0)
-            self.temp_samples.append(round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1))
+            self.temp_samples.append(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0))
             self.temp_avg = round(sum(self.temp_samples) / len(self.temp_samples), 1)
-            if (len(self.humi_samples) == 5): 
+            if (len(self.humi_samples) == WINDOW_SIZE): 
                 self.humi_samples.pop(0)
-            self.humi_samples.append(round(100 * (int(cmd_list[2]) / 65535.0), 1))
+            self.humi_samples.append(100 * (int(cmd_list[2]) / 65535.0))
             self.humi_avg = round(sum(self.humi_samples) / len(self.humi_samples), 1)
+            print(self.temp_samples, self.humi_samples)
 
         self.update_node_status()
 

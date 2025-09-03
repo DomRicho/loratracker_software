@@ -109,7 +109,10 @@ class MainWindow(QMainWindow):
     def handle_serial_data(self, line):
         # Convert ANSI escape codes -> HTML for log window
         html = self.ansi_conv.convert(line, full=False)
-        self.text_log.append(html)
+        if line[0] == '$':
+            self.node_status.append(line)
+        else:
+            self.text_log.append(html)
 
         # Example: parse node status messages
         if ":" in line:

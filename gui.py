@@ -140,11 +140,11 @@ class MainWindow(QMainWindow):
             if (len(self.temp_samples) == 5): 
                 self.temp_samples.pop(0)
             self.temp_samples.append(round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1))
-            self.temp_avg = sum(self.temp_samples) / len(self.temp_samples)
+            self.temp_avg = round(sum(self.temp_samples) / len(self.temp_samples), 1)
             if (len(self.humi_samples) == 5): 
                 self.humi_samples.pop(0)
             self.humi_samples.append(round(100 * (int(cmd_list[2]) / 65535.0), 1))
-            self.humi_avg = sum(self.humi_samples) / len(self.humi_samples)
+            self.humi_avg = round(sum(self.humi_samples) / len(self.humi_samples), 1)
 
         self.update_node_status()
 

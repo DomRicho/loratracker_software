@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QSplitter, QTextEdit
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtGui import QFont
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from ansi2html import Ansi2HTMLConverter
@@ -69,15 +70,19 @@ class MainWindow(QMainWindow):
 
         # Main plot
         self.canvas = MplCanvas(self)
+        font = QFont("monospace")
 
         # Logs (right side, colored)
         self.text_log = QTextEdit()
         self.text_log.setReadOnly(True)
         self.text_log.setAcceptRichText(True)
+        self.text_log.setFont(font)
 
         # Node Status (bottom of plot)
         self.node_status = QTextEdit()
         self.node_status.setReadOnly(True)
+        self.node_status.setFontPointSize(16)
+        self.node_status.setFont(font)
 
         # Splitter for plot + node status
         left_splitter = QSplitter(Qt.Vertical)
@@ -96,12 +101,14 @@ class MainWindow(QMainWindow):
         layout.addWidget(main_splitter)
         self.setCentralWidget(central)
 
+
         # Data storage
         self.x_data = []
         self.y_data = []
-        self.node_states = {}  # dict of node_id -> status string
         self.temp = 0
         self.humi = 0
+        self.nodes = [["GW0", 0, 0, 0], ["AN0", 0, 0, 0], ["AN1", 0, 0, 0]]
+        self.update_node_status()
 
         # ANSI converter
         self.ansi_conv = Ansi2HTMLConverter(inline=True)
@@ -129,8 +136,21 @@ class MainWindow(QMainWindow):
             self.temp = round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1)
             self.humi = round(100 * (int(cmd_list[2]) / 65535.0), 1)
 
+        self.update_node_status()
+
+
+    def update_node_status(self):
         self.node_status.clear()
         self.node_status.append(f"{self.temp} C | {self.humi}%")
+        for node in self.nodes:
+            if node[3] == 0: 
+                status = "No Fix"
+            if node[3] == 1: 
+                status = "Sampling"
+            if node[3] == 2: 
+                status = "Position Hold"
+            self.node_status.append(f"{node[0]} | Position: ({node[1]}, {node[2]}) | Status: {status}")
+
 
     def update_plot(self):
         self.canvas.ax.clear()
@@ -150,10 +170,6 @@ class MainWindow(QMainWindow):
         self.canvas.ax.set_ylabel("Y")
         self.canvas.draw()
 
-    def update_node_status(self):
-        self.node_status.clear()
-        for node, status in sorted(self.node_states.items()):
-            self.node_status.append(f"{node}: {status}")
 
     def closeEvent(self, event):
         self.serial_reader.stop()

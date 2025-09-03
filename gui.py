@@ -116,8 +116,8 @@ class MainWindow(QMainWindow):
 
     def handle_cmd(self, line):
         cmd_list = line[1:-2].split(",")
-        checksum = int(line[-2:])
-        print(cmd_list)
+        checksum = line[-2:]
+        print(cmd_list, checksum)
 
     def update_plot(self):
         self.canvas.ax.clear()

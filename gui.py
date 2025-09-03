@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         self.text_log.append(html)
 
     def handle_cmd(self, line):
-        cmd_list = line.split(separator=",*")
+        cmd_list = line.split(",*")
         print(cmd_list)
 
     def update_plot(self):

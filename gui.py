@@ -126,12 +126,11 @@ class MainWindow(QMainWindow):
             print("Checksum error")
             return
         if cmd_list[0][3:] == "WTHR":
-            temp = -45.0 + 175.0 * (int(cmd_list[1]) / 65535.0)
-            humi = 100 * (int(cmd_list[2]) / 65535.0)
-            print(temp, humi, "%")
+            self.temp = round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1)
+            self.humi = round(100 * (int(cmd_list[2]) / 65535.0), 1)
 
         self.node_status.clear()
-        self.node_status.print(f"{self.temp} C | {self.humi}%")
+        self.node_status.append(f"{self.temp} C | {self.humi}%")
 
     def update_plot(self):
         self.canvas.ax.clear()

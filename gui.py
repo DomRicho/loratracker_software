@@ -13,6 +13,7 @@ from ansi2html import Ansi2HTMLConverter
 
 class SerialReader(QObject):
     data_received = pyqtSignal(str)
+    cmd_received = pyqtSignal(str)
 
     def __init__(self, port="/dev/ttyAMA0", baudrate=115200):
         super().__init__()
@@ -28,7 +29,10 @@ class SerialReader(QObject):
             while self.running:
                 line = ser.readline().decode(errors="ignore").strip()
                 if line:
-                    self.data_received.emit(line)
+                    if line[0] == '$':
+                        self.cmd_received.emit(line)
+                    else:
+                        self.data_received.emit(line)
         except serial.SerialException as e:
             self.data_received.emit(f"Serial error: {e}")
 
@@ -103,35 +107,16 @@ class MainWindow(QMainWindow):
         # Serial reader
         self.serial_reader = SerialReader()
         self.serial_reader.data_received.connect(self.handle_serial_data)
+        self.serial_reader.cmd_received.connect(self.handle_cmd)
 
     def handle_serial_data(self, line):
         # Convert ANSI escape codes -> HTML for log window
         html = self.ansi_conv.convert(line, full=False)
-        if line[0] == '$':
-            self.node_status.append(line)
-        else:
-            self.text_log.append(html)
+        self.text_log.append(html)
 
-        # Example: parse node status messages
-        if ":" in line:
-            parts = line.split(":", 1)
-            node = parts[0].strip()
-            status = parts[1].strip()
-            if node.upper().startswith("NODE"):
-                self.node_states[node] = status
-                self.update_node_status()
-
-        # Try to parse coordinates in the form "x,y"
-        try:
-            parts = line.split(",")
-            if len(parts) == 2:
-                x = float(parts[0].strip())
-                y = float(parts[1].strip())
-                self.x_data.append(x)
-                self.y_data.append(y)
-                self.update_plot()
-        except ValueError:
-            pass  # ignore malformed lines
+    def handle_cmd(self, line):
+        cmd_list = line.split(separator=",*")
+        print(cmd_list)
 
     def update_plot(self):
         self.canvas.ax.clear()

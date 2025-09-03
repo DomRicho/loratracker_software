@@ -115,9 +115,18 @@ class MainWindow(QMainWindow):
         self.text_log.append(html)
 
     def handle_cmd(self, line):
-        cmd_list = line[1:-2].split(",")
-        checksum = line[-2:]
-        print(cmd_list, checksum)
+        cmd_list = line[1:-3].split(",")
+        checksum_recv = int(line[-2:], 16)
+        checksum_calc = 0
+        for c in line[1:-3]:
+            checksum_calc = checksum_calc ^ ord(c)
+
+        if checksum_recv != checksum_calc:
+            print("Checksum error")
+            return
+            
+            
+        if cmd_list[0][3:] == "WTHR":
 
     def update_plot(self):
         self.canvas.ax.clear()

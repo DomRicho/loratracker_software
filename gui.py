@@ -120,13 +120,13 @@ class MainWindow(QMainWindow):
         checksum_calc = 0
         for c in line[1:-3]:
             checksum_calc = checksum_calc ^ ord(c)
-
         if checksum_recv != checksum_calc:
             print("Checksum error")
             return
-            
-            
         if cmd_list[0][3:] == "WTHR":
+            temp = -45.0 + 175.0 * (int(cmd_list[1]) / 65535.0)
+            humi = 100 * (int(cmd_list[2]) / 65535.0)
+            print(temp, humi, "%")
 
     def update_plot(self):
         self.canvas.ax.clear()

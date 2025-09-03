@@ -105,8 +105,12 @@ class MainWindow(QMainWindow):
         # Data storage
         self.x_data = []
         self.y_data = []
-        self.temp = 0
-        self.humi = 0
+        self.temp_samples = []
+        self.temp_n = 0
+        self.temp_avg = 0
+        self.humi_samples = []
+        self.humi_n = 0
+        self.humi_avg = 0
         self.nodes = [["GW0", 0, 0, 0], ["AN0", 0, 0, 0], ["AN1", 0, 0, 0]]
         self.update_node_status()
 
@@ -133,15 +137,21 @@ class MainWindow(QMainWindow):
             print("Checksum error")
             return
         if cmd_list[0][3:] == "WTHR":
-            self.temp = round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1)
-            self.humi = round(100 * (int(cmd_list[2]) / 65535.0), 1)
+            if (len(self.temp_samples) == 5): 
+                self.temp_samples.pop(0)
+            self.temp_samples.append(round(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0), 1))
+            self.temp_avg = sum(self.temp_samples) / len(self.temp_samples)
+            if (len(self.humi_samples) == 5): 
+                self.humi_samples.pop(0)
+            self.humi_samples.append(round(100 * (int(cmd_list[2]) / 65535.0), 1))
+            self.humi_avg = sum(self.humi_samples) / len(self.humi_samples)
 
         self.update_node_status()
 
 
     def update_node_status(self):
         self.node_status.clear()
-        self.node_status.append(f"{self.temp} C | {self.humi}%")
+        self.node_status.append(f"{self.temp_avg} C | {self.humi_avg}%")
         for node in self.nodes:
             if node[3] == 0: 
                 status = "No Fix"

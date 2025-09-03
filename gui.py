@@ -100,6 +100,8 @@ class MainWindow(QMainWindow):
         self.x_data = []
         self.y_data = []
         self.node_states = {}  # dict of node_id -> status string
+        self.temp = 0
+        self.humi = 0
 
         # ANSI converter
         self.ansi_conv = Ansi2HTMLConverter(inline=True)
@@ -127,6 +129,9 @@ class MainWindow(QMainWindow):
             temp = -45.0 + 175.0 * (int(cmd_list[1]) / 65535.0)
             humi = 100 * (int(cmd_list[2]) / 65535.0)
             print(temp, humi, "%")
+
+        self.node_status.clear()
+        self.node_status.print(f"{self.temp} C | {self.humi}%")
 
     def update_plot(self):
         self.canvas.ax.clear()

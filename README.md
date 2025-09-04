@@ -6,4 +6,5 @@
 - read lora data from HAT
 - Plot location estimate based off RSSI and TDoA
 - Show "last seen" packet data
+- Create dataset file and store data
 

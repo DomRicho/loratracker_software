@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         # Node Status (bottom of plot)
         self.node_status = QTextEdit()
         self.node_status.setReadOnly(True)
-        self.node_status.setFontPointSize(16)
+        self.node_status.setFontPointSize(14)
         self.node_status.setFont(font)
 
         # Splitter for plot + node status
@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         self.humi_samples = []
         self.humi_n = 0
         self.humi_avg = 0
-        self.nodes = [["GW0", 0, 0, 0], ["AN0", 0, 0, 0], ["AN1", 0, 0, 0]]
+        self.nodes = [["GW0", 0, 0, 0, 0], ["AN0", 0, 0, 0, 0], ["AN1", 0, 0, 0, 0]]
         self.update_node_status()
 
         # ANSI converter
@@ -146,7 +146,14 @@ class MainWindow(QMainWindow):
                 self.humi_samples.pop(0)
             self.humi_samples.append(100 * (int(cmd_list[2]) / 65535.0))
             self.humi_avg = round(sum(self.humi_samples) / len(self.humi_samples), 1)
-            print(self.temp_samples, self.humi_samples)
+        elif cmd_list[0][3:] == "LORA":
+            print(cmd_list)
+        elif cmd_list[0][3:] == "POS":
+            print(cmd_list)
+        elif cmd_list[0][3:] == "TIME":
+            print(cmd_list)
+        else:
+            print("ERROR:",cmd_list)
 
         self.update_node_status()
 
@@ -162,6 +169,9 @@ class MainWindow(QMainWindow):
             if node[3] == 2: 
                 status = "Position Hold"
             self.node_status.append(f"{node[0]} | Position: ({node[1]}, {node[2]}) | Status: {status}")
+            self.node_status.append(f"\tRecv: t={node[3]}");
+
+        self.node_status.append(f"EN0 | Position (0, 0) | Calc Pos (0, 0)")
 
 
     def update_plot(self):

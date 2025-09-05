@@ -3,13 +3,15 @@ import serial
 import threading
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout,
-    QSplitter, QTextEdit
+    QSplitter, QTextEdit, QPushButton, QLineEdit,
+    QComboBox, QFormLayout, QGroupBox, QLabel, QHBoxLayout
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from PyQt5.QtGui import QFont
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from ansi2html import Ansi2HTMLConverter
+from loratrack_hat import Node
 
 WINDOW_SIZE = 3
 
@@ -51,7 +53,7 @@ class MplCanvas(FigureCanvas):
         self.ax.set_facecolor("#121212")
         fig.patch.set_facecolor("#121212")
 
-        self.ax.grid(color="#444444")  # subtle grid
+        self.ax.grid(color="#444444")
         self.ax.tick_params(colors="#e0e0e0")
         self.ax.xaxis.label.set_color("#e0e0e0")
         self.ax.yaxis.label.set_color("#e0e0e0")
@@ -85,23 +87,76 @@ class MainWindow(QMainWindow):
         self.node_status.setFontPointSize(14)
         self.node_status.setFont(font)
 
-        # Splitter for plot + node status
+        # --- Controls (Start Logging + Inputs) ---
+        self.control_panel = QGroupBox("Controls")
+        control_layout = QVBoxLayout()
+
+        # --- Row 1: Start/Stop Logging ---
+        log_buttons_layout = QHBoxLayout()
+        self.log_button = QPushButton("Start Logging")
+        self.log_button.clicked.connect(self.start_logging)
+        self.log_button_stop = QPushButton("Stop Logging")
+        self.log_button_stop.clicked.connect(self.stop_logging)
+        log_buttons_layout.addWidget(self.log_button)
+        log_buttons_layout.addWidget(self.log_button_stop)
+        control_layout.addLayout(log_buttons_layout)
+
+        # --- Row 2: Latitude, Longitude Inputs + Confirm ---
+        lat_lon_layout = QHBoxLayout()
+        self.lat_input = QLineEdit()
+        self.lat_input.setPlaceholderText("Latitude")
+        self.lon_input = QLineEdit()
+        self.lon_input.setPlaceholderText("Longitude")
+        self.latlon_confirm = QPushButton("Confirm Location")
+        self.latlon_confirm.clicked.connect(self.confirm_location)  # You should define this method
+        lat_lon_layout.addWidget(QLabel("End Node Lat:"))
+        lat_lon_layout.addWidget(self.lat_input)
+        lat_lon_layout.addWidget(QLabel("Lon:"))
+        lat_lon_layout.addWidget(self.lon_input)
+        lat_lon_layout.addWidget(self.latlon_confirm)
+        control_layout.addLayout(lat_lon_layout)
+
+        # --- Row 3: LoRa Config + Confirm ---
+        lora_layout = QHBoxLayout()
+        self.bw_dropdown = QComboBox()
+        self.bw_dropdown.addItems(["500", "250", "125"])
+        self.sf_dropdown = QComboBox()
+        self.sf_dropdown.addItems([str(sf) for sf in range(6, 11)])
+        self.update_lora = QPushButton("Update LoRa Config")
+        self.update_lora.clicked.connect(self.update_lora_cfg)
+        lora_layout.addWidget(QLabel("Bandwidth (kHz):"))
+        lora_layout.addWidget(self.bw_dropdown)
+        lora_layout.addWidget(QLabel("Spreading Factor:"))
+        lora_layout.addWidget(self.sf_dropdown)
+        lora_layout.addWidget(self.update_lora)
+        control_layout.addLayout(lora_layout)
+
+        self.control_panel.setLayout(control_layout)
+
+        # --- Left Side Splitter ---
         left_splitter = QSplitter(Qt.Vertical)
         left_splitter.addWidget(self.canvas)
-        left_splitter.addWidget(self.node_status)
-        left_splitter.setSizes([400, 120])
 
-        # Main splitter: (plot+status) | (log)
+        # --- Container widget to stack controls and node status ---
+        bottom_left_container = QWidget()
+        bottom_left_layout = QVBoxLayout(bottom_left_container)
+        bottom_left_layout.setContentsMargins(0, 0, 0, 0)
+        bottom_left_layout.addWidget(self.control_panel)
+        bottom_left_layout.addWidget(self.node_status)
+
+        left_splitter.addWidget(bottom_left_container)
+        left_splitter.setSizes([1200, 1200])
+
+        # --- Main splitter: (plot+controls+status) | (log) ---
         main_splitter = QSplitter(Qt.Horizontal)
         main_splitter.addWidget(left_splitter)
         main_splitter.addWidget(self.text_log)
-        main_splitter.setSizes([1, 1])  # split evenly
+        main_splitter.setSizes([1200, 1200])
 
         central = QWidget()
         layout = QVBoxLayout(central)
         layout.addWidget(main_splitter)
         self.setCentralWidget(central)
-
 
         # Data storage
         self.x_data = []
@@ -112,7 +167,11 @@ class MainWindow(QMainWindow):
         self.humi_samples = []
         self.humi_n = 0
         self.humi_avg = 0
-        self.nodes = [["GW0", 0, 0, 0, 0], ["AN0", 0, 0, 0, 0], ["AN1", 0, 0, 0, 0]]
+
+        self.gw0 = Node("GW0")
+        self.an0 = Node("AN0")
+        self.an1 = Node("AN1")
+        self.nodes = [self.gw0, self.an0, self.an1]
         self.update_node_status()
 
         # ANSI converter
@@ -123,8 +182,22 @@ class MainWindow(QMainWindow):
         self.serial_reader.data_received.connect(self.handle_serial_data)
         self.serial_reader.cmd_received.connect(self.handle_cmd)
 
+    def confirm_location(self):
+        self.text_log.append("Button Pressed!")
+
+    def update_lora_cfg(self):
+        bw = self.bw_dropdown.currentText()
+        sf = self.sf_dropdown.currentText()
+        self.text_log.append(f"setting bandwidth={bw}KHz and sf={sf}")
+
+
+    def stop_logging(self):
+        self.text_log.append(f"<b>Logging stopped</b><br>")
+
+    def start_logging(self):
+        self.text_log.append(f"<b>Logging Started</b><br>")
+
     def handle_serial_data(self, line):
-        # Convert ANSI escape codes -> HTML for log window
         html = self.ansi_conv.convert(line, full=False)
         self.text_log.append(html)
 
@@ -137,6 +210,7 @@ class MainWindow(QMainWindow):
         if checksum_recv != checksum_calc:
             print("Checksum error")
             return
+
         if cmd_list[0][3:] == "WTHR":
             if (len(self.temp_samples) == WINDOW_SIZE): 
                 self.temp_samples.pop(0)
@@ -146,38 +220,53 @@ class MainWindow(QMainWindow):
                 self.humi_samples.pop(0)
             self.humi_samples.append(100 * (int(cmd_list[2]) / 65535.0))
             self.humi_avg = round(sum(self.humi_samples) / len(self.humi_samples), 1)
+
         elif cmd_list[0][3:] == "LORA":
-            print(cmd_list)
+            if cmd_list[0][:3] == "GW0":
+                self.gw0.add_info(cmd_list)
+            elif cmd_list[0][:3] == "AN0":
+                self.an0.add_info(cmd_list)
+            elif cmd_list[0][:3] == "AN1":
+                self.an1.add_info(cmd_list)
+            else:
+                print("invalid node id")
+                
         elif cmd_list[0][3:] == "POS":
+            if cmd_list[0][:3] == "GW0":
+                self.gw0.set_nav(cmd_list)
+            elif cmd_list[0][:3] == "AN0":
+                self.an0.set_nav(cmd_list)
+            elif cmd_list[0][:3] == "AN1":
+                self.an1.set_nav(cmd_list)
+            else:
+                print("invalid node id")
             print(cmd_list)
+
         elif cmd_list[0][3:] == "TIME":
             print(cmd_list)
         else:
-            print("ERROR:",cmd_list)
+            print("ERROR:", cmd_list)
 
         self.update_node_status()
-
 
     def update_node_status(self):
         self.node_status.clear()
         self.node_status.append(f"{self.temp_avg} C | {self.humi_avg}%")
         for node in self.nodes:
-            if node[3] == 0: 
+            if node.fix_status == 0: 
                 status = "No Fix"
-            if node[3] == 1: 
+            if node.fix_status == 1: 
                 status = "Sampling"
-            if node[3] == 2: 
+            if node.fix_status == 2: 
                 status = "Position Hold"
-            self.node_status.append(f"{node[0]} | Position: ({node[1]}, {node[2]}) | Status: {status}")
-            self.node_status.append(f"\tRecv: t={node[3]}");
-
+            self.node_status.append(f"{node.id} | Position: ({node.pos[0]}, {node.pos[1]}) | Status: {status}")
+            self.node_status.append(f"\tRecv: t={node.timestamp}")
         self.node_status.append(f"EN0 | Position (0, 0) | Calc Pos (0, 0)")
-
 
     def update_plot(self):
         self.canvas.ax.clear()
 
-        # --- Reapply dark styling after clear ---
+        # Reapply dark styling
         self.canvas.ax.set_facecolor("#121212")
         self.canvas.figure.patch.set_facecolor("#121212")
         self.canvas.ax.grid(color="#444444")
@@ -191,7 +280,6 @@ class MainWindow(QMainWindow):
         self.canvas.ax.set_xlabel("X")
         self.canvas.ax.set_ylabel("Y")
         self.canvas.draw()
-
 
     def closeEvent(self, event):
         self.serial_reader.stop()
@@ -207,10 +295,13 @@ if __name__ == "__main__":
             background-color: #121212;
             color: #e0e0e0;
         }
-        QTextEdit, QLabel {
+        QTextEdit, QLabel, QLineEdit, QComboBox, QPushButton {
             background-color: #1e1e1e;
             color: #e0e0e0;
             border: 1px solid #333333;
+        }
+        QPushButton {
+            padding: 4px;
         }
     """
     app.setStyleSheet(dark_stylesheet)

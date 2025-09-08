@@ -12,8 +12,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from ansi2html import Ansi2HTMLConverter
 from loratrack_hat import Node
+from weather import Weather
+from logger import CSVLogger
+import time
 
-WINDOW_SIZE = 3
 
 class SerialReader(QObject):
     data_received = pyqtSignal(str)
@@ -159,20 +161,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
 
         # Data storage
-        self.x_data = []
-        self.y_data = []
-        self.temp_samples = []
-        self.temp_n = 0
-        self.temp_avg = 0
-        self.humi_samples = []
-        self.humi_n = 0
-        self.humi_avg = 0
-
+        self.weather = Weather()
         self.gw0 = Node("GW0")
         self.an0 = Node("AN0")
         self.an1 = Node("AN1")
-        self.nodes = [self.gw0, self.an0, self.an1]
+        self.en0 = Node("EN0")
+        self.nodes = [self.gw0, self.an0, self.an1, self.en0]
         self.update_node_status()
+        self.logger = None;
 
         # ANSI converter
         self.ansi_conv = Ansi2HTMLConverter(inline=True)
@@ -192,10 +188,22 @@ class MainWindow(QMainWindow):
 
 
     def stop_logging(self):
-        self.text_log.append(f"<b>Logging stopped</b><br>")
+        if (self.logger is not None): 
+            self.logger.close()
+            self.logger = None
+            self.text_log.append(f"<b>Logging stopped</b>")
+        else:
+            self.text_log.append("<b style='color:orange'>WARNING: No current logging</b>")
 
     def start_logging(self):
-        self.text_log.append(f"<b>Logging Started</b><br>")
+        if self.logger is None:
+            self.text_log.append(f"<b>Logging Started</b>")
+            self.logger = CSVLogger(
+                f"data/dataset_{round(time.time())}_{self.bw_dropdown.currentText()}_{self.sf_dropdown.currentText()}.csv", 
+                headers=["packet_id","node_id","toa","rssi","snr","temp","humi"]
+            )
+        else:
+            self.text_log.append("<b style='color:orange'>WARNING: Already Logging</b>")
 
     def handle_serial_data(self, line):
         html = self.ansi_conv.convert(line, full=False)
@@ -212,15 +220,7 @@ class MainWindow(QMainWindow):
             return
 
         if cmd_list[0][3:] == "WTHR":
-            if (len(self.temp_samples) == WINDOW_SIZE): 
-                self.temp_samples.pop(0)
-            self.temp_samples.append(-45.0 + 175.0 * (int(cmd_list[1]) / 65535.0))
-            self.temp_avg = round(sum(self.temp_samples) / len(self.temp_samples), 1)
-            if (len(self.humi_samples) == WINDOW_SIZE): 
-                self.humi_samples.pop(0)
-            self.humi_samples.append(100 * (int(cmd_list[2]) / 65535.0))
-            self.humi_avg = round(sum(self.humi_samples) / len(self.humi_samples), 1)
-
+            self.weather.add_samples(int(cmd_list[1]), int(cmd_list[2]))
         elif cmd_list[0][3:] == "LORA":
             if cmd_list[0][:3] == "GW0":
                 self.gw0.add_info(cmd_list)
@@ -251,7 +251,7 @@ class MainWindow(QMainWindow):
 
     def update_node_status(self):
         self.node_status.clear()
-        self.node_status.append(f"{self.temp_avg} C | {self.humi_avg}%")
+        self.node_status.append(f"{self.weather.temp_avg} C | {self.weather.humi_avg}%")
         for node in self.nodes:
             if node.fix_status == 0: 
                 status = "No Fix"
@@ -261,7 +261,6 @@ class MainWindow(QMainWindow):
                 status = "Position Hold"
             self.node_status.append(f"{node.id} | Position: ({node.pos[0]}, {node.pos[1]}) | Status: {status}")
             self.node_status.append(f"\tRecv: t={node.timestamp}")
-        self.node_status.append(f"EN0 | Position (0, 0) | Calc Pos (0, 0)")
 
     def update_plot(self):
         self.canvas.ax.clear()
@@ -284,6 +283,8 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.serial_reader.stop()
         super().closeEvent(event)
+
+
 
 
 if __name__ == "__main__":

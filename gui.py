@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
             return
 
         if cmd_list[0][3:] == "WTHR":
-            self.weather.add_samples(int(cmd_list[1]), int(cmd_list[2]))
+            self.weather.add_sample(int(cmd_list[1]), int(cmd_list[2]))
         elif cmd_list[0][3:] == "LORA":
             if cmd_list[0][:3] == "GW0":
                 self.gw0.add_info(cmd_list)

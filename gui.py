@@ -1,4 +1,5 @@
 import sys
+import math
 import serial
 import threading
 from PyQt5.QtWidgets import (
@@ -259,7 +260,11 @@ class MainWindow(QMainWindow):
                 status = "Sampling"
             if node.fix_status == 2: 
                 status = "Position Hold"
-            self.node_status.append(f"{node.id} | Position: ({node.nav[0]}, {node.nav[1]}) | Status: {status}")
+
+            distance, angle = node.distance_from(self.nodes[0])
+            x = distance * math.cos(angle)
+            y = distance * math.sin(angle)
+            self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
             self.node_status.append(f"\tRecv: t={node.timestamp}")
 
     def update_plot(self):

@@ -7,7 +7,7 @@ class Node():
         self.timestamp = 0
         self.ticks = 0
         self.pos = (0, 0)
-        self.nav = (0, 0, 0)
+        self.nav = (-27.4705, 153.0260, 0)
         self.fix_status = 0
         self.poshold = 0
         self.geod = Geod(ellps="WGS84")
@@ -19,6 +19,5 @@ class Node():
         self.nav = (lat/1e9, lon/1e9, alt)
 
     def distance_from(self, node):
-        fwd_az, back_az, dis = self.geod.inv(self.nav[0], self.nav[1], node.nav[0], node.nav[1])
-        print(dis, fwd_az)
+        fwd_az, back_az, dis = self.geod.inv(self.nav[1], self.nav[0], node.nav[1], node.nav[0])
         return (dis, fwd_az)

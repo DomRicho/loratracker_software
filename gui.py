@@ -254,16 +254,10 @@ class MainWindow(QMainWindow):
         self.node_status.clear()
         self.node_status.append(f"{self.weather.temp_avg} C | {self.weather.humi_avg}%")
         for node in self.nodes:
-            if node.fix_status == 0: 
-                status = "No Fix"
-            if node.fix_status == 1: 
-                status = "Sampling"
-            if node.fix_status == 2: 
-                status = "Position Hold"
-
             distance, angle = node.distance_from(self.gw0)
-            x = distance * math.cos(angle)
-            y = distance * math.sin(angle)
+            angle = math.radians(angle)
+            x = round(distance * math.cos(angle), 2)
+            y = round(distance * math.sin(angle), 2)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
             self.node_status.append(f"\tRecv: t={node.timestamp}")
 

@@ -278,7 +278,7 @@ class MainWindow(QMainWindow):
         self.canvas.ax.yaxis.label.set_color("#e0e0e0")
         self.canvas.ax.title.set_color("#e0e0e0")
 
-        self.canvas.ax.plot(x, y, marker="o", linestyle="-")
+        self.canvas.ax.plot(x, y, marker="o", linestyle="")
         self.canvas.ax.set_title("Coordinate Plot")
         self.canvas.ax.set_xlabel("X")
         self.canvas.ax.set_ylabel("Y")

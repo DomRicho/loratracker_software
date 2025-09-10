@@ -235,9 +235,9 @@ class MainWindow(QMainWindow):
             if cmd_list[0][:3] == "GW0":
                 self.gw0.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
             elif cmd_list[0][:3] == "AN0":
-                self.an0.set_nav(cmd_list)
+                self.an0.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
             elif cmd_list[0][:3] == "AN1":
-                self.an1.set_nav(cmd_list)
+                self.an1.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
             else:
                 print("invalid node id")
             print(cmd_list)
@@ -259,7 +259,7 @@ class MainWindow(QMainWindow):
                 status = "Sampling"
             if node.fix_status == 2: 
                 status = "Position Hold"
-            self.node_status.append(f"{node.id} | Position: ({node.pos[0]}, {node.pos[1]}) | Status: {status}")
+            self.node_status.append(f"{node.id} | Position: ({node.nav[0]}, {node.nav[1]}) | Status: {status}")
             self.node_status.append(f"\tRecv: t={node.timestamp}")
 
     def update_plot(self):

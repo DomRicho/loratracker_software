@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
                 
         elif cmd_list[0][3:] == "POS":
             if cmd_list[0][:3] == "GW0":
-                self.gw0.set_nav(cmd_list)
+                self.gw0.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
             elif cmd_list[0][:3] == "AN0":
                 self.an0.set_nav(cmd_list)
             elif cmd_list[0][:3] == "AN1":

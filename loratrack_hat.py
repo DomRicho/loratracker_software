@@ -13,5 +13,5 @@ class Node():
     def add_lora_info(self, info):
         pass
 
-    def add_nav(self, lat, lon, alt):
+    def set_nav(self, lat, lon, alt):
         self.nav = (lat, lon, alt)

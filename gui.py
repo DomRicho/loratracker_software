@@ -261,7 +261,7 @@ class MainWindow(QMainWindow):
             if node.fix_status == 2: 
                 status = "Position Hold"
 
-            distance, angle = node.distance_from(self.nodes[0])
+            distance, angle = node.distance_from(self.gw0)
             x = distance * math.cos(angle)
             y = distance * math.sin(angle)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 

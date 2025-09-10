@@ -20,4 +20,5 @@ class Node():
 
     def distance_from(self, node):
         fwd_az, back_az, dis = self.geod.inv(self.nav[0], self.nav[1], node.nav[0], node.nav[1])
+        print(dis, fwd_az)
         return (dis, fwd_az)

@@ -253,15 +253,20 @@ class MainWindow(QMainWindow):
     def update_node_status(self):
         self.node_status.clear()
         self.node_status.append(f"{self.weather.temp_avg} C | {self.weather.humi_avg}%")
+        x_list = []
+        y_list = []
         for node in self.nodes:
             distance, angle = node.distance_from(self.gw0)
             angle = math.radians(angle)
-            x = round(distance * math.cos(angle), 2)
-            y = round(distance * math.sin(angle), 2)
+            y = round(distance * math.sin(angle), 1)
+            x = round(distance * math.cos(angle), 1)
+            x_list.append(x)
+            y_list.append(y)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
             self.node_status.append(f"\tRecv: t={node.timestamp}")
+        self.update_plot(x_list, y_list)
 
-    def update_plot(self):
+    def update_plot(self, x, y):
         self.canvas.ax.clear()
 
         # Reapply dark styling
@@ -273,7 +278,7 @@ class MainWindow(QMainWindow):
         self.canvas.ax.yaxis.label.set_color("#e0e0e0")
         self.canvas.ax.title.set_color("#e0e0e0")
 
-        self.canvas.ax.plot(self.x_data, self.y_data, marker="o", linestyle="-")
+        self.canvas.ax.plot(x, y, marker="o", linestyle="-")
         self.canvas.ax.set_title("Coordinate Plot")
         self.canvas.ax.set_xlabel("X")
         self.canvas.ax.set_ylabel("Y")

@@ -165,9 +165,7 @@ class MainWindow(QMainWindow):
         self.weather = Weather()
         self.gw0 = Node("GW0")
         self.an0 = Node("AN0")
-        self.an0.nav = (153, -27, 0)
         self.an1 = Node("AN1")
-        self.an0.nav = (152, -26, 0)
         self.en0 = Node("EN0")
         self.nodes = [self.gw0, self.an0, self.an1, self.en0]
         self.update_node_status()
@@ -184,7 +182,7 @@ class MainWindow(QMainWindow):
     def confirm_location(self):
         lat = float(self.lat_input.text())
         lon = float(self.lon_input.text())
-        self.en0.nav = (lat, lon, 0)
+        self.en0.nav = (lon, lat, 0)
         self.update_node_status()
 
     def update_lora_cfg(self):
@@ -240,6 +238,8 @@ class MainWindow(QMainWindow):
         elif cmd_list[0][3:] == "POS":
             if cmd_list[0][:3] == "GW0":
                 self.gw0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
+                self.an0.set_nav(float(cmd_list[1])+2, float(cmd_list[2])+2, float(cmd_list[3]))
+                self.an1.set_nav(float(cmd_list[1])-2, float(cmd_list[2])-20, float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN0":
                 self.an0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN1":
@@ -268,7 +268,6 @@ class MainWindow(QMainWindow):
             x_list.append(x)
             y_list.append(y)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
-            self.node_status.append(f"\tRecv: t={node.timestamp}")
         self.update_plot(x_list, y_list)
 
     def update_plot(self, x, y):

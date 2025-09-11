@@ -4,10 +4,11 @@ class Node():
         self.id = id
         self.nav = (0, 0, 0)
         self.geod = Geod(ellps="WGS84")
-        self.lora_info = (-1, -1, -1, -1)
+        self.lora_info = (-1, -1, -1, -1, 0)
 
-    def add_lora_info(self, id, rssi, snr, timestamp):
-        self.lora_info = (id, rssi, snr, timestamp)
+    def add_lora_info(self, id, rssi, snr, timestamp, ticks):
+        nano_sec = round(ticks * 3.57142857143)
+        self.lora_info = (id, rssi, snr, timestamp, nano_sec)
 
     def set_nav(self, lon, lat, alt):
         self.nav = (lon/1e9, lat/1e9, alt)

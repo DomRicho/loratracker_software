@@ -231,14 +231,13 @@ class MainWindow(QMainWindow):
             snr = int(cmd_list[3])
             timestamp = int(cmd_list[4])
             ticks = int(cmd_list[5])
-            timestamp = timestamp + (ticks / 280000000)
             if cmd_list[0][:3] == "GW0":
 
-                self.gw0.add_lora_info(packet_id, rssi, snr, timestamp)
+                self.gw0.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
             elif cmd_list[0][:3] == "AN0":
-                self.an0.add_lora_info(packet_id, rssi, snr, timestamp)
+                self.an0.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
             elif cmd_list[0][:3] == "AN1":
-                self.an1.add_lora_info(packet_id, rssi, snr, timestamp)
+                self.an1.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
             else:
                 print("invalid node id")
                 
@@ -276,7 +275,7 @@ class MainWindow(QMainWindow):
             x_list.append(x)
             y_list.append(y)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
-            self.node_status.append(f"{node.lora_info[0]} : {node.lora_info[1]}dBm, {node.lora_info[2]}dB, {node.lora_info[3]}s") 
+            self.node_status.append(f"{node.lora_info[0]} : {node.lora_info[1]}dBm, {node.lora_info[2]}dB, {node.lora_info[3]}.{node.lora_info[4]}s") 
         self.update_plot(x_list, y_list)
 
     def update_plot(self, x, y):

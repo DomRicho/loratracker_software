@@ -165,7 +165,9 @@ class MainWindow(QMainWindow):
         self.weather = Weather()
         self.gw0 = Node("GW0")
         self.an0 = Node("AN0")
+        self.an0.nav = (-27, 153)
         self.an1 = Node("AN1")
+        self.an0.nav = (-28, 152)
         self.en0 = Node("EN0")
         self.nodes = [self.gw0, self.an0, self.an1, self.en0]
         self.update_node_status()
@@ -180,7 +182,10 @@ class MainWindow(QMainWindow):
         self.serial_reader.cmd_received.connect(self.handle_cmd)
 
     def confirm_location(self):
-        self.text_log.append("Button Pressed!")
+        lat = float(self.lat_input.text())
+        lon = float(self.lon_input.text())
+        self.en0.nav = (lat, lon, 0)
+        self.update_node_status()
 
     def update_lora_cfg(self):
         bw = self.bw_dropdown.currentText()

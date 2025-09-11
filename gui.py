@@ -239,11 +239,11 @@ class MainWindow(QMainWindow):
                 
         elif cmd_list[0][3:] == "POS":
             if cmd_list[0][:3] == "GW0":
-                self.gw0.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
+                self.gw0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN0":
-                self.an0.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
+                self.an0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN1":
-                self.an1.set_nav(int(cmd_list[1]), int(cmd_list[2]), int(cmd_list[3]))
+                self.an1.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             else:
                 print("invalid node id")
             print(cmd_list)

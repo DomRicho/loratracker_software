@@ -2,14 +2,7 @@ from pyproj import Geod
 class Node():
     def __init__(self, id):
         self.id = id
-        self.rssi = 0
-        self.snr = 0
-        self.timestamp = 0
-        self.ticks = 0
-        self.pos = (0, 0)
         self.nav = (0, 0, 0)
-        self.fix_status = 0
-        self.poshold = 0
         self.geod = Geod(ellps="WGS84")
 
     def add_lora_info(self, info):

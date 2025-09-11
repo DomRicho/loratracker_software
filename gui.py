@@ -165,9 +165,9 @@ class MainWindow(QMainWindow):
         self.weather = Weather()
         self.gw0 = Node("GW0")
         self.an0 = Node("AN0")
-        self.an0.nav = (-27, 153)
+        self.an0.nav = (153, -27, 0)
         self.an1 = Node("AN1")
-        self.an0.nav = (-28, 152)
+        self.an0.nav = (152, -26, 0)
         self.en0 = Node("EN0")
         self.nodes = [self.gw0, self.an0, self.an1, self.en0]
         self.update_node_status()

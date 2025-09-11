@@ -263,8 +263,8 @@ class MainWindow(QMainWindow):
         for node in self.nodes:
             distance, angle = node.distance_from(self.gw0)
             angle = math.radians(angle)
-            y = round(distance * math.sin(angle), 1)
             x = round(distance * math.cos(angle), 1)
+            y = round(distance * math.sin(angle), 1)
             x_list.append(x)
             y_list.append(y)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 

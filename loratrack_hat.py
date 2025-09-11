@@ -7,7 +7,7 @@ class Node():
         self.timestamp = 0
         self.ticks = 0
         self.pos = (0, 0)
-        self.nav = (-27.4705, 153.0260, 0)
+        self.nav = (0, 0, 0)
         self.fix_status = 0
         self.poshold = 0
         self.geod = Geod(ellps="WGS84")
@@ -15,9 +15,9 @@ class Node():
     def add_lora_info(self, info):
         pass
 
-    def set_nav(self, lat, lon, alt):
-        self.nav = (lat/1e9, lon/1e9, alt)
+    def set_nav(self, lon, lat, alt):
+        self.nav = (lon/1e9, lat/1e9, alt)
 
     def distance_from(self, node):
-        fwd_az, back_az, dis = self.geod.inv(node.nav[1], node.nav[0], self.nav[1], self.nav[0])
+        fwd_az, back_az, dis = self.geod.inv(node.nav[0], node.nav[1], self.nav[0], self.nav[1])
         return (dis, fwd_az)

@@ -19,5 +19,5 @@ class Node():
         self.nav = (lat/1e9, lon/1e9, alt)
 
     def distance_from(self, node):
-        fwd_az, back_az, dis = self.geod.inv(self.nav[1], self.nav[0], node.nav[1], node.nav[0])
+        fwd_az, back_az, dis = self.geod.inv(node.nav[1], node.nav[0], self.nav[1], self.nav[0])
         return (dis, fwd_az)

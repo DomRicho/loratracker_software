@@ -231,8 +231,8 @@ class MainWindow(QMainWindow):
             snr = int(cmd_list[3])
             timestamp = int(cmd_list[4])
             ticks = int(cmd_list[5])
+            print(cmd_list)
             if cmd_list[0][:3] == "GW0":
-
                 self.gw0.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
             elif cmd_list[0][:3] == "AN0":
                 self.an0.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
@@ -242,18 +242,15 @@ class MainWindow(QMainWindow):
                 print("invalid node id")
                 
         elif cmd_list[0][3:] == "POS":
+            print(cmd_list)
             if cmd_list[0][:3] == "GW0":
                 self.gw0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
-                self.an0.set_nav(float(cmd_list[1])+16000, float(cmd_list[2])-16000, float(cmd_list[3]))
-                self.an1.set_nav(float(cmd_list[1])+16000, float(cmd_list[2])+16000, float(cmd_list[3]))
-                self.en0.set_nav(float(cmd_list[1]), float(cmd_list[2])+8000, float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN0":
                 self.an0.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             elif cmd_list[0][:3] == "AN1":
                 self.an1.set_nav(float(cmd_list[1]), float(cmd_list[2]), float(cmd_list[3]))
             else:
                 print("invalid node id")
-            print(cmd_list)
 
         elif cmd_list[0][3:] == "TIME":
             print(cmd_list)

@@ -167,6 +167,7 @@ class MainWindow(QMainWindow):
         self.an0 = Node("AN0")
         self.an1 = Node("AN1")
         self.en0 = Node("EN0")
+        self.en0.nav = (153.0260, -27.4705, 0)
         self.nodes = [self.gw0, self.an0, self.an1, self.en0]
         self.update_node_status()
         self.logger = None;

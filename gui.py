@@ -272,7 +272,7 @@ class MainWindow(QMainWindow):
             x_list.append(x)
             y_list.append(y)
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
-            if self.node.id == "EN0":
+            if node.id == "EN0":
                 self.node_status.append(f"TDoA Pos (0,0), RSSI Pos (0,0)")
             else:
                 self.node_status.append(f"{node.lora_info[0]} : {node.lora_info[1]}dBm, {node.lora_info[2]}dB, {node.lora_info[3]}.{node.lora_info[4]}s") 

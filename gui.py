@@ -242,6 +242,11 @@ class MainWindow(QMainWindow):
                 self.an1.add_lora_info(packet_id, rssi, snr, timestamp, ticks)
             else:
                 print("invalid node id")
+                return
+
+            if self.logger:
+                self.logger.write_row([cmd_list[0][:3],packet_id, rssi, snr, timestamp, ticks])
+
                 
         elif cmd_list[0][3:] == "POS":
             print(cmd_list)

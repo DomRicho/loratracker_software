@@ -292,11 +292,11 @@ class MainWindow(QMainWindow):
 
         for node in self.nodes:
             if node.id == "GW0":
-                self.canvas.ax.plot(node.x, node.y, marker="g^", linestyle="")
+                self.canvas.ax.plot(node.x, node.y, marker="^", linestyle="", color="g")
             elif node.id == "AN0" or node.id == "AN1":
-                self.canvas.ax.plot(node.x, node.y, marker="wv", linestyle="")
+                self.canvas.ax.plot(node.x, node.y, marker="v", linestyle="", color="w")
             elif node.id == "EN0":
-                self.canvas.ax.plot(node.x, node.y, marker="rs", linestyle="")
+                self.canvas.ax.plot(node.x, node.y, marker="s", linestyle="", color="r")
                 # self.canvas.ax.plot(node.x, node.y, marker="s", linestyle="")
                 # self.canvas.ax.plot(node.x, node.y, marker="s", linestyle="")
                 

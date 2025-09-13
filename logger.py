@@ -13,7 +13,7 @@ class CSVLogger:
         self.writer = csv.writer(self.file)
         
         if nav_info:
-            self.writer.writerow(["GW0_POS", "AN0_POS", "AN1_POS", "EN0_POS"])
+            self.writer.writerow(["gw0_x", "gw0_y", "an0_x", "an0_y", "an1_x", "an1_y", "en0_x", "en0_y"])
             self.writer.writerow(nav_info)
         if headers:
             self.writer.writerow(headers)

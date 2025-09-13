@@ -1,7 +1,7 @@
 import csv
 
 class CSVLogger:
-    def __init__(self, filename, headers=None):
+    def __init__(self, filename, headers=None, nav_info=None):
         """
         Initialize the CSV logger.
 
@@ -12,6 +12,9 @@ class CSVLogger:
         self.file = open(self.filename, mode='w', newline='', encoding='utf-8')
         self.writer = csv.writer(self.file)
         
+        if nav_info:
+            self.writer.writerow(["GW0_POS", "AN0_POS", "AN1_POS", "EN0_POS"])
+            self.writer.writerow(nav_info)
         if headers:
             self.writer.writerow(headers)
 

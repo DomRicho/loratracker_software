@@ -4,6 +4,8 @@ class Node():
         self.id = id
         self.nav = (0, 0, 0)
         self.geod = Geod(ellps="WGS84")
+        self.x = 0
+        self.y = 0
         self.lora_info = (-1, -1, -1, -1, 0)
 
     def add_lora_info(self, id, rssi, snr, timestamp, ticks):

@@ -205,7 +205,8 @@ class MainWindow(QMainWindow):
             self.text_log.append(f"<b>Logging Started</b>")
             self.logger = CSVLogger(
                 f"data/dataset_{round(time.time())}_{self.bw_dropdown.currentText()}_{self.sf_dropdown.currentText()}.csv", 
-                headers=["packet_id","node_id","toa","rssi","snr","temp","humi"]
+                headers=["packet_id","node_id","toa","rssi","snr","temp","humi"],
+                nav_info=[f"0,0,{self.an0.x},{self.an0.y},{self.an1.x},{self.an1.y},{self.en0.x},{self.en1.y}", ]
             )
         else:
             self.text_log.append("<b style='color:orange'>WARNING: Already Logging</b>")
@@ -263,23 +264,21 @@ class MainWindow(QMainWindow):
     def update_node_status(self):
         self.node_status.clear()
         self.node_status.append(f"{self.weather.temp_avg} C | {self.weather.humi_avg}%")
-        x_list = []
-        y_list = []
         for node in self.nodes:
             distance, angle = node.distance_from(self.gw0)
             angle = math.radians(angle)
             x = round(distance * math.cos(angle), 1)
             y = round(distance * math.sin(angle), 1)
-            x_list.append(x)
-            y_list.append(y)
+            node.x = x
+            node.y = y
             self.node_status.append(f"{node.id} | Position: ({x}, {y})") 
             if node.id == "EN0":
                 self.node_status.append(f"TDoA Pos (0,0), RSSI Pos (0,0)")
             else:
                 self.node_status.append(f"{node.lora_info[0]} : {node.lora_info[1]}dBm, {node.lora_info[2]}dB, {node.lora_info[3]}.{node.lora_info[4]}s") 
-        self.update_plot(x_list, y_list)
+        self.update_plot()
 
-    def update_plot(self, x, y):
+    def update_plot(self):
         self.canvas.ax.clear()
 
         # Reapply dark styling
@@ -291,7 +290,16 @@ class MainWindow(QMainWindow):
         self.canvas.ax.yaxis.label.set_color("#e0e0e0")
         self.canvas.ax.title.set_color("#e0e0e0")
 
-        self.canvas.ax.plot(x, y, marker="o", linestyle="")
+        for node in self.nodes:
+            if node.id == "GW0":
+                self.canvas.ax.plot(node.x, node.y, marker="g^", linestyle="")
+            elif node.id == "AN0" or node.id == "AN1":
+                self.canvas.ax.plot(node.x, node.y, marker="wv", linestyle="")
+            elif node.id == "EN0":
+                self.canvas.ax.plot(node.x, node.y, marker="rs", linestyle="")
+                # self.canvas.ax.plot(node.x, node.y, marker="s", linestyle="")
+                # self.canvas.ax.plot(node.x, node.y, marker="s", linestyle="")
+                
         self.canvas.ax.set_title("Coordinate Plot")
         self.canvas.ax.set_xlabel("X")
         self.canvas.ax.set_ylabel("Y")

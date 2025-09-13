@@ -206,7 +206,7 @@ class MainWindow(QMainWindow):
             self.logger = CSVLogger(
                 f"data/dataset_{round(time.time())}_{self.bw_dropdown.currentText()}_{self.sf_dropdown.currentText()}.csv", 
                 headers=["packet_id","node_id","toa","rssi","snr","temp","humi"],
-                nav_info=[f"0","0",f"{self.an0.x}",f"{self.an0.y}",f"{self.an1.x}",f"{self.an1.y}",f"{self.en0.x}","{self.en0.y}"]
+                nav_info=[f"0","0",f"{self.an0.x}",f"{self.an0.y}",f"{self.an1.x}",f"{self.an1.y}",f"{self.en0.x}",f"{self.en0.y}"]
             )
         else:
             self.text_log.append("<b style='color:orange'>WARNING: Already Logging</b>")
